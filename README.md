@@ -1,3 +1,22 @@
+# Interview module
+---
+## Requirements
+* A recruiter should be able to set-up an interview appoitnment with an applicant.
+* A recruiter should be able to save notes taken during the interview.
+* The interview should be performed via video conference over the browser.
+* Participants should be able to send text information during the interview.
+* Participants should be able to send hand-drawn images as a message.
+* Access to the interview seccion should be secure.
+    * Invite only via link and a whitelist for participants identified by email address.
+    * Accessible only during the scheduled time.
+    * Logs of relevant data should be kept.
+        * Total duration.
+        * Analytics on participant interactions.
+            * Ration of participation.
+            * Interviewee attention towards the screen.
+            * Fluency in conversation.
+* Capture overal conclusion of interview.
+---
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
