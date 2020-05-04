@@ -12,11 +12,12 @@ type ConferenceState = {
 
 interface Action {
   type: string,
-  payload: MediaStream | string | RTCPeerConnection
+  payload?: MediaStream | string | RTCPeerConnection
 }
 
 const LOCALSTREAM = 'LOCALSTREAM';
 const REMOTESTREAM = 'REMOTESTREAM';
+const HANGUP = 'HANGUP';
 
 const initialState: ConferenceState = {
   localStream: null,
@@ -31,11 +32,13 @@ function reducer(state: ConferenceState, action: Action) {
       return Object.assign({}, state, { localStream: action.payload });
     case REMOTESTREAM:
       return Object.assign({}, state, { remoteStream: action.payload });
+    case HANGUP:
+      return Object.assign({}, state, { localStream: null, remoteStream: null });
     default:
       return state;
   }
 }
- 
+
 // let peerConnection = new RTCPeerConnection(configuration);
 
 function App() {
@@ -51,25 +54,26 @@ function App() {
     dispatch({
       type: REMOTESTREAM,
       payload: new MediaStream()
-    });    
+    });
   }
   async function hangUp() {
     const tracks = state.localStream?.getTracks();
 
-    if(!tracks) return;
-    
+    if (!tracks) return;
+
     tracks.forEach(track => {
       track.stop();
     });
-  
+
     if (state.remoteStream) {
       state.remoteStream.getTracks().forEach(track => track.stop());
     }
-  
+
+    dispatch({ type: HANGUP })
     // if (peerConnection) {
     //   peerConnection.close();
     // }
-  
+
     // document.querySelector('#localVideo').srcObject = null;
     // document.querySelector('#remoteVideo').srcObject = null;
     // document.querySelector('#cameraBtn').disabled = false;
@@ -77,7 +81,7 @@ function App() {
     // document.querySelector('#createBtn').disabled = true;
     // document.querySelector('#hangupBtn').disabled = true;
     // document.querySelector('#currentRoom').innerText = '';
-  
+
     // Delete room on hangup
     // if (roomId) {
     //   const db = firebase.firestore();
@@ -92,7 +96,7 @@ function App() {
     //   });
     //   await roomRef.delete();
     // }
-  
+
     // document.location.reload(true);
   }
   // openUserMedia();
