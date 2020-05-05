@@ -1,6 +1,7 @@
 import React, { useReducer } from 'react';
-import configuration from './utils/ICEServerConfig';
+// import configuration from './utils/ICEServerConfig';
 import logo from './logo.svg';
+import firebase from 'firebase';
 import './App.css';
 
 type ConferenceState = {
@@ -58,29 +59,18 @@ function App() {
   }
   async function hangUp() {
     const tracks = state.localStream?.getTracks();
-
     if (!tracks) return;
-
+    // Stop all media tracks for streams and set them to null
     tracks.forEach(track => {
       track.stop();
     });
-
     if (state.remoteStream) {
       state.remoteStream.getTracks().forEach(track => track.stop());
     }
-
+    if (state.peerConnection) {
+      state.peerConnection.close();
+    }
     dispatch({ type: HANGUP })
-    // if (peerConnection) {
-    //   peerConnection.close();
-    // }
-
-    // document.querySelector('#localVideo').srcObject = null;
-    // document.querySelector('#remoteVideo').srcObject = null;
-    // document.querySelector('#cameraBtn').disabled = false;
-    // document.querySelector('#joinBtn').disabled = true;
-    // document.querySelector('#createBtn').disabled = true;
-    // document.querySelector('#hangupBtn').disabled = true;
-    // document.querySelector('#currentRoom').innerText = '';
 
     // Delete room on hangup
     // if (roomId) {
@@ -99,14 +89,37 @@ function App() {
 
     // document.location.reload(true);
   }
-  // openUserMedia();
+  function registerPeerConnectionListeners() {
+    if (!state.peerConnection) return;
+    state.peerConnection.addEventListener('icegatheringstatechange', () => {
+      console.log(
+        `ICE gathering state changed: ${state.peerConnection!.iceGatheringState}`);
+    });
+
+    state.peerConnection.addEventListener('connectionstatechange', () => {
+      console.log(`Connection state change: ${state.peerConnection!.connectionState}`);
+    });
+
+    state.peerConnection.addEventListener('signalingstatechange', () => {
+      console.log(`Signaling state change: ${state.peerConnection!.signalingState}`);
+    });
+
+    state.peerConnection.addEventListener('iceconnectionstatechange ', () => {
+      console.log(
+        `ICE connection state change: ${state.peerConnection!.iceConnectionState}`);
+    });
+  }
+
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
+
         {/* Grant access to media devices */}
-        <button onClick={openUserMedia}>Access the media devices</button>
-        <button onClick={hangUp}>Hang up</button>
+        <div id="buttons">
+          <button onClick={openUserMedia}>Access the media devices</button>
+          <button onClick={hangUp}>Hang up</button>
+        </div>
 
         <div id="room">
           <span>Current room: {state.room}</span>
