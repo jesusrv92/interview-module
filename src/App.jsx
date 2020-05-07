@@ -2,34 +2,22 @@ import React, { useReducer } from 'react';
 import configuration from './utils/ICEServerConfig';
 import logo from './logo.svg';
 import firebase from 'firebase';
+import reducer from './utils/reducer'
+import {
+  SETLOCALSTREAM,
+  SETREMOTESTREAM,
+  HANGUP,
+  SETPEERCONNECTION,
+  SETROOM,
+  TOGGLEJOIN
+} from './utils/actions'
 import './App.css';
 
 let firebaseApp = firebase.initializeApp({
   projectId: "fir-rtcchat"
 })
 
-type ConferenceState = {
-  join: boolean
-  mediaOpen: boolean
-  localStream: MediaStream | null
-  remoteStream: MediaStream | null
-  room: string | null,
-  peerConnection: RTCPeerConnection | null
-};
-
-interface Action {
-  type: string,
-  payload?: MediaStream | string | RTCPeerConnection
-}
-
-const SETLOCALSTREAM = 'SETLOCALSTREAM';
-const SETREMOTESTREAM = 'SETREMOTESTREAM';
-const HANGUP = 'HANGUP';
-const SETPEERCONNECTION = 'SETPEERCONNECTION';
-const SETROOM = 'SETROOM';
-const TOGGLEJOIN = 'TOGGLEJOIN';
-
-const initialState: ConferenceState = {
+const initialState = {
   join: false,
   mediaOpen: false,
   localStream: null,
@@ -37,27 +25,6 @@ const initialState: ConferenceState = {
   room: null,
   peerConnection: null,
 };
-
-function reducer(state: ConferenceState, action: Action) {
-  switch (action.type) {
-    case SETLOCALSTREAM:
-      return Object.assign({}, state, { localStream: action.payload, mediaOpen: true });
-    case SETREMOTESTREAM:
-      return Object.assign({}, state, { remoteStream: action.payload });
-    case HANGUP:
-      return Object.assign({}, state, { localStream: null, remoteStream: null, mediaOpen: true });
-    case SETPEERCONNECTION:
-      return Object.assign({}, state, { peerConnection: action.payload });
-    case SETROOM:
-      return Object.assign({}, state, { room: action.payload });
-    case TOGGLEJOIN:
-      return Object.assign({}, state, { join: !state.join });
-    default:
-      return state;
-  }
-}
-
-// let peerConnection = new RTCPeerConnection(configuration);
 
 function App() {
 
@@ -123,7 +90,7 @@ function App() {
     registerPeerConnectionListeners(peerConnection);
 
     state.localStream.getTracks().forEach(track => {
-      peerConnection.addTrack(track, state.localStream!);
+      peerConnection.addTrack(track, state.localStream);
     });
 
     // Code for collecting ICE candidates
@@ -161,17 +128,17 @@ function App() {
       console.log('Got remote track:', event.streams[0]);
       event.streams[0].getTracks().forEach(track => {
         console.log('Add a track to the remoteStream:', track);
-        state.remoteStream!.addTrack(track);
+        state.remoteStream.addTrack(track);
       });
     });
 
     // Listening for remote session description
     roomRef.onSnapshot(async snapshot => {
       const data = snapshot.data();
-      if (!peerConnection.currentRemoteDescription && data && data.answer) {
+      if (state.peerConnection?.currentRemoteDescription && data && data.answer) {
         console.log('Got remote description: ', data.answer);
         const rtcSessionDescription = new RTCSessionDescription(data.answer);
-        await peerConnection.setRemoteDescription(rtcSessionDescription);
+        await state.peerConnection.setRemoteDescription(rtcSessionDescription);
       }
     });
 
@@ -181,7 +148,7 @@ function App() {
         if (change.type === 'added') {
           let data = change.doc.data();
           console.log(`Got new remote ICE candidate: ${JSON.stringify(data)}`);
-          await peerConnection.addIceCandidate(new RTCIceCandidate(data));
+          await state.peerConnection.addIceCandidate(new RTCIceCandidate(data));
         }
       });
     });
@@ -191,7 +158,7 @@ function App() {
       type: TOGGLEJOIN
     });
   }
-  async function joinRoomById(roomId: string) {
+  async function joinRoomById(roomId) {
     const db = firebaseApp.firestore();
     const roomRef = db.collection('rooms').doc(`${roomId}`);
     const roomSnapshot = await roomRef.get();
@@ -202,8 +169,8 @@ function App() {
       let peerConnection = new RTCPeerConnection(configuration);
       registerPeerConnectionListeners(peerConnection);
 
-      state.localStream?.getTracks().forEach(track => {
-        peerConnection.addTrack(track, state.localStream!);
+      state.localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, state.localStream);
       });
 
       // Code for collecting ICE candidates
@@ -221,12 +188,12 @@ function App() {
         console.log('Got remote track:', event.streams[0]);
         event.streams[0].getTracks().forEach(track => {
           console.log('Add a track to the remoteStream:', track);
-          state.remoteStream!.addTrack(track);
+          state.remoteStream.addTrack(track);
         });
       });
 
       // Code for creating SDP answer
-      const offer = roomSnapshot.data()!.offer;
+      const offer = roomSnapshot.data().offer;
       console.log('Got offer:', offer);
       await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
       const answer = await peerConnection.createAnswer();
@@ -257,24 +224,24 @@ function App() {
       type: TOGGLEJOIN
     })
   }
-  function registerPeerConnectionListeners(peerConnection: RTCPeerConnection) {
+  function registerPeerConnectionListeners(peerConnection) {
     if (!peerConnection) return;
     peerConnection.addEventListener('icegatheringstatechange', () => {
       console.log(
-        `ICE gathering state changed: ${peerConnection!.iceGatheringState}`);
+        `ICE gathering state changed: ${peerConnection.iceGatheringState}`);
     });
 
     peerConnection.addEventListener('connectionstatechange', () => {
-      console.log(`Connection state change: ${peerConnection!.connectionState}`);
+      console.log(`Connection state change: ${peerConnection.connectionState}`);
     });
 
     peerConnection.addEventListener('signalingstatechange', () => {
-      console.log(`Signaling state change: ${peerConnection!.signalingState}`);
+      console.log(`Signaling state change: ${peerConnection.signalingState}`);
     });
 
     peerConnection.addEventListener('iceconnectionstatechange ', () => {
       console.log(
-        `ICE connection state change: ${peerConnection!.iceConnectionState}`);
+        `ICE connection state change: ${peerConnection.iceConnectionState}`);
     });
   }
   return (
@@ -293,13 +260,13 @@ function App() {
         </div>
         <div id="roomID" hidden={!state.join}>
           Enter roomID: <input onInput={e => {
-            let input = e.target as HTMLInputElement
+            let input = e.target;
             dispatch({
               type: SETROOM,
               payload: input.value
             });
           }} type="text" /> <button onClick={() => {
-            joinRoomById(state.room!);
+            joinRoomById(state.room);
           }}>Join</button>
         </div>
         <div id="room">
