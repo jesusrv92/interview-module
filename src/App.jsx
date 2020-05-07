@@ -1,8 +1,11 @@
 import React, { useReducer } from 'react';
 import configuration from './utils/ICEServerConfig';
 import logo from './logo.svg';
-import firebase from 'firebase';
-import reducer from './utils/reducer'
+import firebase from 'firebase/app';
+import 'firebase/firestore';
+import reducer from './utils/reducer';
+import Clipboard from 'react-clipboard.js';
+
 import {
   SETLOCALSTREAM,
   SETREMOTESTREAM,
@@ -27,8 +30,17 @@ const initialState = {
 };
 
 function App() {
-
   const [state, dispatch] = useReducer(reducer, initialState);
+  let roomQuery = window.location.pathname.slice(1);
+  if (roomQuery && !state.mediaOpen) {
+    openUserMedia().then(() => {
+      dispatch({
+        type: SETROOM,
+        payload: roomQuery
+      });
+      return joinRoomById(roomQuery);
+    }).catch(e => e)
+  }
   async function openUserMedia() {
     // Ask for access to webcam and microphone
     const stream = await navigator.mediaDevices.getUserMedia(
@@ -219,10 +231,6 @@ function App() {
         });
       });
     }
-
-    dispatch({
-      type: TOGGLEJOIN
-    })
   }
   function registerPeerConnectionListeners(peerConnection) {
     if (!peerConnection) return;
@@ -266,11 +274,15 @@ function App() {
               payload: input.value
             });
           }} type="text" /> <button onClick={() => {
+            joinRoom();
             joinRoomById(state.room);
           }}>Join</button>
         </div>
-        <div id="room">
+        <div id="room" hidden={!state.room}>
           <span>Current room: {state.room}</span>
+          <Clipboard data-clipboard-text={window.location.origin + '/' + state.room}>
+            Copy invitation to clipboard
+          </Clipboard>
         </div>
 
         {/* // React doesn't grant direct access to the srcObject property
