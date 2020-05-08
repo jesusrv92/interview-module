@@ -21,7 +21,7 @@ div#videos {
 div#videos > video {
   background: black;
   width: 640px;
-  height: 100%;
+  height: 480px;
   display: block;
   margin: 1em;
 }
