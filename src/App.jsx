@@ -83,8 +83,6 @@ function App() {
       });
       await roomRef.delete();
     }
-
-    // document.location.reload(true);
   }
   async function createRoom() {
     if (!state.localStream) return;
@@ -147,7 +145,7 @@ function App() {
     // Listening for remote session description
     roomRef.onSnapshot(async snapshot => {
       const data = snapshot.data();
-      if (state.peerConnection?.currentRemoteDescription && data && data.answer) {
+      if (!state.peerConnection?.currentRemoteDescription && data && data.answer) {
         console.log('Got remote description: ', data.answer);
         const rtcSessionDescription = new RTCSessionDescription(data.answer);
         await state.peerConnection.setRemoteDescription(rtcSessionDescription);
@@ -165,7 +163,7 @@ function App() {
       });
     });
   }
-  function joinRoom() {
+  function toggleJoinRoomInput() {
     dispatch({
       type: TOGGLEJOIN
     });
@@ -179,6 +177,10 @@ function App() {
     if (roomSnapshot.exists) {
       console.log('Create PeerConnection with configuration: ', configuration);
       let peerConnection = new RTCPeerConnection(configuration);
+      dispatch({
+        type: SETPEERCONNECTION,
+        payload: peerConnection
+      });
       registerPeerConnectionListeners(peerConnection);
 
       state.localStream.getTracks().forEach(track => {
@@ -263,7 +265,7 @@ function App() {
           <div id="chat-buttons" hidden={!state.mediaOpen}>
             <button onClick={hangUp}>Hang up</button>
             <button onClick={createRoom}>Create room</button>
-            <button onClick={joinRoom}>Join room</button>
+            <button onClick={toggleJoinRoomInput}>Join room</button>
           </div>
         </div>
         <div id="roomID" hidden={!state.join}>
@@ -274,7 +276,7 @@ function App() {
               payload: input.value
             });
           }} type="text" /> <button onClick={() => {
-            joinRoom();
+            toggleJoinRoomInput();
             joinRoomById(state.room);
           }}>Join</button>
         </div>
