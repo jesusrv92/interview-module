@@ -1,6 +1,6 @@
 import React, { useReducer } from 'react';
 import configuration from './utils/ICEServerConfig';
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import reducer from './utils/reducer';
@@ -32,6 +32,7 @@ const initialState = {
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   let roomQuery = window.location.pathname.slice(1);
+
   if (roomQuery && !state.mediaOpen) {
     openUserMedia().then(() => {
       dispatch({
@@ -41,6 +42,7 @@ function App() {
       return joinRoomById(roomQuery);
     }).catch(e => e)
   }
+
   async function openUserMedia() {
     // Ask for access to webcam and microphone
     const stream = await navigator.mediaDevices.getUserMedia(
@@ -54,6 +56,7 @@ function App() {
       payload: new MediaStream()
     });
   }
+
   async function hangUp() {
     const tracks = state.localStream?.getTracks();
     if (!tracks) return;
@@ -67,7 +70,7 @@ function App() {
     if (state.peerConnection) {
       state.peerConnection.close();
     }
-    dispatch({ type: HANGUP })
+    dispatch({ type: HANGUP, payload: initialState });
 
     // Delete room on hangup
     if (state.room) {
@@ -84,6 +87,7 @@ function App() {
       await roomRef.delete();
     }
   }
+
   async function createRoom() {
     if (!state.localStream) return;
     const db = firebaseApp.firestore();
@@ -139,6 +143,11 @@ function App() {
       event.streams[0].getTracks().forEach(track => {
         console.log('Add a track to the remoteStream:', track);
         state.remoteStream.addTrack(track);
+        console.log(state.remoteStream);
+      });
+      dispatch({
+        type: SETREMOTESTREAM,
+        payload: state.remoteStream
       });
     });
 
@@ -163,11 +172,13 @@ function App() {
       });
     });
   }
+
   function toggleJoinRoomInput() {
     dispatch({
       type: TOGGLEJOIN
     });
   }
+
   async function joinRoomById(roomId) {
     const db = firebaseApp.firestore();
     const roomRef = db.collection('rooms').doc(`${roomId}`);
@@ -203,6 +214,11 @@ function App() {
         event.streams[0].getTracks().forEach(track => {
           console.log('Add a track to the remoteStream:', track);
           state.remoteStream.addTrack(track);
+          console.log(state.remoteStream)
+        });
+        dispatch({
+          type: SETREMOTESTREAM,
+          payload: state.remoteStream
         });
       });
 
@@ -234,6 +250,7 @@ function App() {
       });
     }
   }
+
   function registerPeerConnectionListeners(peerConnection) {
     if (!peerConnection) return;
     peerConnection.addEventListener('icegatheringstatechange', () => {
@@ -254,14 +271,15 @@ function App() {
         `ICE connection state change: ${peerConnection.iceConnectionState}`);
     });
   }
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        {/* <img src={logo} className="App-logo" alt="logo" /> */}
 
         {/* Grant access to media devices */}
         <div id="buttons">
-          <button onClick={openUserMedia}>Access the media devices</button>
+          <button onClick={openUserMedia} hidden={state.mediaOpen}>Access the media devices</button>
           <div id="chat-buttons" hidden={!state.mediaOpen}>
             <button onClick={hangUp}>Hang up</button>
             <button onClick={createRoom}>Create room</button>
@@ -290,10 +308,10 @@ function App() {
         {/* // React doesn't grant direct access to the srcObject property
         // We have to use a reference. */}
         <div id="videos">
-          <video ref={video => {
+          <video id="local" ref={video => {
             if (video) video.srcObject = state.localStream;
           }} muted autoPlay></video>
-          <video ref={video => {
+          <video id="remote" ref={video => {
             if (video) video.srcObject = state.remoteStream;
           }} autoPlay></video>
         </div>
