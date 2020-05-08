@@ -14,7 +14,7 @@ export default function reducer(state, action) {
         case SETREMOTESTREAM:
             return Object.assign({}, state, { remoteStream: action.payload });
         case HANGUP:
-            return Object.assign({}, state, { localStream: null, remoteStream: null, mediaOpen: true });
+            return Object.assign({}, action.payload);
         case SETPEERCONNECTION:
             return Object.assign({}, state, { peerConnection: action.payload });
         case SETROOM:
