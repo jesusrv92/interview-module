@@ -39,22 +39,27 @@ function App() {
         type: SETROOM,
         payload: roomQuery
       });
-      return joinRoomById(roomQuery);
-    }).catch(e => e)
+      return roomQuery;
+    }).then(joinRoomById).catch(e => e)
   }
 
   async function openUserMedia() {
     // Ask for access to webcam and microphone
-    const stream = await navigator.mediaDevices.getUserMedia(
-      { video: true, audio: true });
-    dispatch({
-      type: SETLOCALSTREAM,
-      payload: stream
-    });
-    dispatch({
-      type: SETREMOTESTREAM,
-      payload: new MediaStream()
-    });
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(
+        { video: true, audio: true });
+      dispatch({
+        type: SETLOCALSTREAM,
+        payload: stream
+      });
+      dispatch({
+        type: SETREMOTESTREAM,
+        payload: new MediaStream()
+      });
+    }
+    catch {
+      console.error('Error while obtaining media');
+    }
   }
 
   async function hangUp() {
@@ -154,7 +159,8 @@ function App() {
     // Listening for remote session description
     roomRef.onSnapshot(async snapshot => {
       const data = snapshot.data();
-      if (!state.peerConnection?.currentRemoteDescription && data && data.answer) {
+      if (state.peerConnection === null) return;
+      if (!state.peerConnection.currentRemoteDescription && data && data.answer) {
         console.log('Got remote description: ', data.answer);
         const rtcSessionDescription = new RTCSessionDescription(data.answer);
         await state.peerConnection.setRemoteDescription(rtcSessionDescription);
@@ -193,6 +199,7 @@ function App() {
         payload: peerConnection
       });
       registerPeerConnectionListeners(peerConnection);
+      console.log('Peer connection is: ', peerConnection);
 
       state.localStream.getTracks().forEach(track => {
         peerConnection.addTrack(track, state.localStream);
@@ -252,7 +259,6 @@ function App() {
   }
 
   function registerPeerConnectionListeners(peerConnection) {
-    if (!peerConnection) return;
     peerConnection.addEventListener('icegatheringstatechange', () => {
       console.log(
         `ICE gathering state changed: ${peerConnection.iceGatheringState}`);
@@ -299,7 +305,7 @@ function App() {
           }}>Join</button>
         </div>
         <div id="room" hidden={!state.room}>
-          <span>Current room: {state.room}</span>
+          <div>Current room: {state.room}</div>
           <Clipboard data-clipboard-text={window.location.origin + '/' + state.room}>
             Copy invitation to clipboard
           </Clipboard>
@@ -310,10 +316,10 @@ function App() {
         <div id="videos">
           <video id="local" ref={video => {
             if (video) video.srcObject = state.localStream;
-          }} muted autoPlay></video>
+          }} muted autoPlay playsInline></video>
           <video id="remote" ref={video => {
             if (video) video.srcObject = state.remoteStream;
-          }} autoPlay></video>
+          }} autoPlay playsInline></video>
         </div>
 
       </header>
