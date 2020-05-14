@@ -29,6 +29,7 @@ const initialState = {
 };
 
 function App() {
+  // These global variables are a fallback in case the state hasn't been set yet when it's needed
   let localStreamGlobal, remoteStreamGlobal, peerConnectionGlobal;
   const [state, dispatch] = useReducer(reducer, initialState);
   let roomQuery = window.location.pathname.slice(1);
