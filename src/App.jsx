@@ -1,6 +1,5 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import configuration from './utils/ICEServerConfig';
-// import logo from './logo.svg';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import reducer from './utils/reducer';
@@ -30,31 +29,52 @@ const initialState = {
 };
 
 function App() {
+  let localStreamGlobal, remoteStreamGlobal, peerConnectionGlobal;
   const [state, dispatch] = useReducer(reducer, initialState);
   let roomQuery = window.location.pathname.slice(1);
 
-  if (roomQuery && !state.mediaOpen) {
-    openUserMedia().then(() => {
-      dispatch({
-        type: SETROOM,
-        payload: roomQuery
-      });
-      return roomQuery;
-    }).then(joinRoomById).catch(e => e)
-  }
+  useEffect(() => {
+    async function invitation() {
+      try {
+        if (roomQuery && !state.mediaOpen) {
+          await openUserMedia();
+          console.log('Could open media');
+          await new Promise((res) => {
+            dispatch({
+              type: SETROOM,
+              payload: roomQuery
+            });
+            return res();
+          })
+          console.log('Could dispatch room');
+          await joinRoomById(roomQuery);
+          console.log('Could join room');
+        }
+      }
+      catch (e) {
+        console.log(e);
+        console.error('Error while trying to connect through invitation.')
+      }
+    }
+
+    invitation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
 
   async function openUserMedia() {
     // Ask for access to webcam and microphone
     try {
       const stream = await navigator.mediaDevices.getUserMedia(
         { video: true, audio: true });
+      localStreamGlobal = stream;
       dispatch({
         type: SETLOCALSTREAM,
         payload: stream
       });
+      remoteStreamGlobal = new MediaStream()
       dispatch({
         type: SETREMOTESTREAM,
-        payload: new MediaStream()
+        payload: remoteStreamGlobal
       });
     }
     catch {
@@ -94,13 +114,15 @@ function App() {
   }
 
   async function createRoom() {
-    if (!state.localStream) return;
+    let localStream = state.localStream || localStreamGlobal;
+    let remoteStream = state.remoteStream || remoteStreamGlobal;
+
     const db = firebaseApp.firestore();
     const roomRef = await db.collection('rooms').doc();
 
     console.log('Create PeerConnection with configuration: ', configuration);
     let peerConnection = new RTCPeerConnection(configuration);
-
+    peerConnectionGlobal = peerConnection;
     dispatch({
       type: SETPEERCONNECTION,
       payload: peerConnection
@@ -108,8 +130,8 @@ function App() {
 
     registerPeerConnectionListeners(peerConnection);
 
-    state.localStream.getTracks().forEach(track => {
-      peerConnection.addTrack(track, state.localStream);
+    localStream.getTracks().forEach(track => {
+      peerConnection.addTrack(track, localStream);
     });
 
     // Code for collecting ICE candidates
@@ -147,33 +169,34 @@ function App() {
       console.log('Got remote track:', event.streams[0]);
       event.streams[0].getTracks().forEach(track => {
         console.log('Add a track to the remoteStream:', track);
-        state.remoteStream.addTrack(track);
-        console.log(state.remoteStream);
+        remoteStream.addTrack(track);
+        console.log(remoteStream);
       });
       dispatch({
         type: SETREMOTESTREAM,
-        payload: state.remoteStream
+        payload: remoteStream
       });
     });
 
     // Listening for remote session description
     roomRef.onSnapshot(async snapshot => {
       const data = snapshot.data();
-      if (state.peerConnection === null) return;
-      if (!state.peerConnection.currentRemoteDescription && data && data.answer) {
+      let peerConnection = state.peerConnection || peerConnectionGlobal;
+      if (!peerConnection.currentRemoteDescription && data && data.answer) {
         console.log('Got remote description: ', data.answer);
         const rtcSessionDescription = new RTCSessionDescription(data.answer);
-        await state.peerConnection.setRemoteDescription(rtcSessionDescription);
+        await peerConnection.setRemoteDescription(rtcSessionDescription);
       }
     });
 
     // Listen for remote ICE candidates
     roomRef.collection('calleeCandidates').onSnapshot(snapshot => {
       snapshot.docChanges().forEach(async change => {
+        let peerConnection = state.peerConnection || peerConnectionGlobal;
         if (change.type === 'added') {
           let data = change.doc.data();
           console.log(`Got new remote ICE candidate: ${JSON.stringify(data)}`);
-          await state.peerConnection.addIceCandidate(new RTCIceCandidate(data));
+          await peerConnection.addIceCandidate(new RTCIceCandidate(data));
         }
       });
     });
@@ -189,11 +212,16 @@ function App() {
     const db = firebaseApp.firestore();
     const roomRef = db.collection('rooms').doc(`${roomId}`);
     const roomSnapshot = await roomRef.get();
+    console.log(state.localStream)
     console.log('Got room:', roomSnapshot.exists);
 
     if (roomSnapshot.exists) {
+      let localStream = state.localStream || localStreamGlobal;
+      let remoteStream = state.remoteStream || remoteStreamGlobal;
+
       console.log('Create PeerConnection with configuration: ', configuration);
       let peerConnection = new RTCPeerConnection(configuration);
+      peerConnectionGlobal = peerConnection;
       dispatch({
         type: SETPEERCONNECTION,
         payload: peerConnection
@@ -201,8 +229,8 @@ function App() {
       registerPeerConnectionListeners(peerConnection);
       console.log('Peer connection is: ', peerConnection);
 
-      state.localStream.getTracks().forEach(track => {
-        peerConnection.addTrack(track, state.localStream);
+      localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, localStream);
       });
 
       // Code for collecting ICE candidates
@@ -220,12 +248,12 @@ function App() {
         console.log('Got remote track:', event.streams[0]);
         event.streams[0].getTracks().forEach(track => {
           console.log('Add a track to the remoteStream:', track);
-          state.remoteStream.addTrack(track);
-          console.log(state.remoteStream)
+          remoteStream.addTrack(track);
+          console.log(remoteStream)
         });
         dispatch({
           type: SETREMOTESTREAM,
-          payload: state.remoteStream
+          payload: remoteStream
         });
       });
 
@@ -281,8 +309,6 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        {/* <img src={logo} className="App-logo" alt="logo" /> */}
-
         {/* Grant access to media devices */}
         <div id="buttons">
           <button onClick={openUserMedia} hidden={state.mediaOpen}>Access the media devices</button>
