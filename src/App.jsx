@@ -40,7 +40,7 @@ function App() {
     async function invitation() {
       try {
         if (roomQuery && !state.mediaOpen) {
-          await openUserMedia();
+          await openUserMedia(dispatch);
           console.log('Could open media');
           dispatch({
             type: SETROOM,
@@ -67,7 +67,7 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function openUserMedia() {
+  async function openUserMedia(dispatch) {
     // Ask for access to webcam and microphone
     try {
       const stream = await navigator.mediaDevices.getUserMedia(
@@ -85,6 +85,9 @@ function App() {
     }
     catch {
       console.error('Error while obtaining media');
+      dispatch({
+        type: HANGUP
+      });
     }
   }
 
