@@ -58,7 +58,8 @@ function App() {
         console.log(e);
         console.error('Error while trying to connect through invitation.')
         dispatch({
-          type: HANGUP
+          type: HANGUP,
+          payload: initialState
         });
       }
     }
@@ -86,7 +87,8 @@ function App() {
     catch {
       console.error('Error while obtaining media');
       dispatch({
-        type: HANGUP
+        type: HANGUP,
+        payload: initialState
       });
     }
   }
