@@ -25,3 +25,7 @@ div#videos > video {
   display: block;
   margin: 1em;
 }
+
+video#local {
+  transform: scaleX(-1);
+}
