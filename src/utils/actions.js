@@ -3,4 +3,4 @@ export const SETREMOTESTREAM = 'SETREMOTESTREAM';
 export const HANGUP = 'HANGUP';
 export const SETPEERCONNECTION = 'SETPEERCONNECTION';
 export const SETROOM = 'SETROOM';
-export const TOGGLEJOIN = 'TOGGLEJOIN';
+export const SETINVITED = 'SETINVITED';

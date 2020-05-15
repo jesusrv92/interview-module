@@ -4,7 +4,7 @@ import {
     HANGUP,
     SETPEERCONNECTION,
     SETROOM,
-    TOGGLEJOIN
+    SETINVITED
 } from './actions'
 
 export default function reducer(state, action) {
@@ -19,8 +19,8 @@ export default function reducer(state, action) {
             return Object.assign({}, state, { peerConnection: action.payload });
         case SETROOM:
             return Object.assign({}, state, { room: action.payload });
-        case TOGGLEJOIN:
-            return Object.assign({}, state, { join: !state.join });
+        case SETINVITED:
+            return Object.assign({}, state, { invited: true });
         default:
             return state;
     }
