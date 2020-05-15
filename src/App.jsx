@@ -5,13 +5,15 @@ import 'firebase/firestore';
 import reducer from './utils/reducer';
 import Clipboard from 'react-clipboard.js';
 
+import VideoStream from './components/VideoStream'
+
 import {
   SETLOCALSTREAM,
   SETREMOTESTREAM,
   HANGUP,
   SETPEERCONNECTION,
   SETROOM,
-  TOGGLEJOIN
+  SETINVITED
 } from './utils/actions'
 import './App.css';
 
@@ -20,7 +22,7 @@ let firebaseApp = firebase.initializeApp({
 })
 
 const initialState = {
-  join: false,
+  invited: false,
   mediaOpen: false,
   localStream: null,
   remoteStream: null,
@@ -40,13 +42,13 @@ function App() {
         if (roomQuery && !state.mediaOpen) {
           await openUserMedia();
           console.log('Could open media');
-          await new Promise((res) => {
-            dispatch({
-              type: SETROOM,
-              payload: roomQuery
-            });
-            return res();
-          })
+          dispatch({
+            type: SETROOM,
+            payload: roomQuery
+          });
+          dispatch({
+            type: SETINVITED
+          });
           console.log('Could dispatch room');
           await joinRoomById(roomQuery);
           console.log('Could join room');
@@ -55,12 +57,15 @@ function App() {
       catch (e) {
         console.log(e);
         console.error('Error while trying to connect through invitation.')
+        dispatch({
+          type: HANGUP
+        });
       }
     }
 
     invitation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[]);
+  }, []);
 
   async function openUserMedia() {
     // Ask for access to webcam and microphone
@@ -203,12 +208,6 @@ function App() {
     });
   }
 
-  function toggleJoinRoomInput() {
-    dispatch({
-      type: TOGGLEJOIN
-    });
-  }
-
   async function joinRoomById(roomId) {
     const db = firebaseApp.firestore();
     const roomRef = db.collection('rooms').doc(`${roomId}`);
@@ -312,41 +311,22 @@ function App() {
       <header className="App-header">
         {/* Grant access to media devices */}
         <div id="buttons">
-          <button onClick={openUserMedia} hidden={state.mediaOpen}>Access the media devices</button>
+          <button data-testid="open-media" onClick={openUserMedia} hidden={state.mediaOpen}>Access the media devices</button>
           <div id="chat-buttons" hidden={!state.mediaOpen}>
-            <button onClick={hangUp}>Hang up</button>
-            <button onClick={createRoom}>Create room</button>
-            <button onClick={toggleJoinRoomInput}>Join room</button>
+            <button id="hang-up" onClick={hangUp}>Hang up</button>
+            <button id="create-room" onClick={createRoom}>Create room</button>
           </div>
-        </div>
-        <div id="roomID" hidden={!state.join}>
-          Enter roomID: <input onInput={e => {
-            let input = e.target;
-            dispatch({
-              type: SETROOM,
-              payload: input.value
-            });
-          }} type="text" /> <button onClick={() => {
-            toggleJoinRoomInput();
-            joinRoomById(state.room);
-          }}>Join</button>
         </div>
         <div id="room" hidden={!state.room}>
           <div>Current room: {state.room}</div>
-          <Clipboard data-clipboard-text={window.location.origin + '/' + state.room}>
+          {!state.invited ? <Clipboard data-clipboard-text={window.location.origin + '/' + state.room}>
             Copy invitation to clipboard
-          </Clipboard>
+          </Clipboard> : <></>}
         </div>
 
-        {/* // React doesn't grant direct access to the srcObject property
-        // We have to use a reference. */}
         <div id="videos">
-          <video id="local" ref={video => {
-            if (video) video.srcObject = state.localStream;
-          }} muted autoPlay playsInline></video>
-          <video id="remote" ref={video => {
-            if (video) video.srcObject = state.remoteStream;
-          }} autoPlay playsInline></video>
+          <VideoStream id="local" stream={state.localStream} muted={true} />
+          <VideoStream id="remote" stream={state.remoteStream} />
         </div>
 
       </header>
