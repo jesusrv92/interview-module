@@ -13,11 +13,11 @@ Object.defineProperty(window, 'MediaStream', {
 });
 
 test('Component renders without crashing.', () => {
-  render(<App />);
+  act(() => { render(<App />) });
 });
 
-// test('Opens media without crashing.', () => {
-  // const app = render(<App />);
-  // const openMediaButton = app.getByTestId('open-media');
-  // act(() => openMediaButton.click());
-// });
+test('Opens media without crashing.', () => {
+  const app = render(<App />);
+  const openMediaButton = app.getByTestId('open-media');
+  act(() => openMediaButton.click());
+});
