@@ -34,6 +34,7 @@
     ]
   },
   "devDependencies": {
+    "@types/jest": "^25.2.3",
     "why-did-you-update": "^1.0.8"
   }
 }
