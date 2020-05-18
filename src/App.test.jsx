@@ -13,7 +13,7 @@ Object.defineProperty(window, 'MediaStream', {
 });
 
 test('Component renders without crashing.', () => {
-  act(() => { render(<App />) });
+  render(<App />);
 });
 
 test('Opens media without crashing.', () => {
