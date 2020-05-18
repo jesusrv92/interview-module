@@ -14,7 +14,8 @@ import {
   SETPEERCONNECTION,
   SETROOM,
   SETINVITED
-} from './utils/actions'
+} from './utils/actions';
+import registerPeerConnectionListeners from './utils/registerPeerConnectionListeners'
 import './App.css';
 
 let firebaseApp = firebase.initializeApp({
@@ -24,7 +25,7 @@ let firebaseApp = firebase.initializeApp({
 function App() {
   // These global variables are a fallback in case the state hasn't been set yet when it's needed
   let localStreamGlobal, remoteStreamGlobal, peerConnectionGlobal;
-  const [state, dispatch] = useReducer(reducer);
+  const [state, dispatch] = useReducer(reducer, {});
   let roomQuery = window.location.pathname.slice(1);
 
   useEffect(() => {
@@ -179,6 +180,7 @@ function App() {
     roomRef.onSnapshot(async snapshot => {
       const data = snapshot.data();
       let peerConnection = state.peerConnection || peerConnectionGlobal;
+      if (peerConnection.connectionState === 'closed') return;
       if (!peerConnection.currentRemoteDescription && data && data.answer) {
         console.log('Got remote description: ', data.answer);
         const rtcSessionDescription = new RTCSessionDescription(data.answer);
@@ -190,6 +192,7 @@ function App() {
     roomRef.collection('calleeCandidates').onSnapshot(snapshot => {
       snapshot.docChanges().forEach(async change => {
         let peerConnection = state.peerConnection || peerConnectionGlobal;
+        if (peerConnection.connectionState === 'closed') return;
         if (change.type === 'added') {
           let data = change.doc.data();
           console.log(`Got new remote ICE candidate: ${JSON.stringify(data)}`);
@@ -277,26 +280,6 @@ function App() {
     }
   }
 
-  function registerPeerConnectionListeners(peerConnection) {
-    peerConnection.addEventListener('icegatheringstatechange', () => {
-      console.log(
-        `ICE gathering state changed: ${peerConnection.iceGatheringState}`);
-    });
-
-    peerConnection.addEventListener('connectionstatechange', () => {
-      console.log(`Connection state change: ${peerConnection.connectionState}`);
-    });
-
-    peerConnection.addEventListener('signalingstatechange', () => {
-      console.log(`Signaling state change: ${peerConnection.signalingState}`);
-    });
-
-    peerConnection.addEventListener('iceconnectionstatechange ', () => {
-      console.log(
-        `ICE connection state change: ${peerConnection.iceConnectionState}`);
-    });
-  }
-
   return (
     <div className="App">
       <header className="App-header">
@@ -305,7 +288,7 @@ function App() {
           <button data-testid="open-media" onClick={openUserMedia} hidden={state.mediaOpen}>Access the media devices</button>
           <div id="chat-buttons" hidden={!state.mediaOpen}>
             <button id="hang-up" onClick={hangUp}>Hang up</button>
-            <button id="create-room" onClick={createRoom}>Create room</button>
+            <button id="create-room" onClick={createRoom} hidden={state.invited}>Create room</button>
           </div>
         </div>
         <div id="room" hidden={!state.room}>
