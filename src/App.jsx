@@ -299,7 +299,7 @@ function App() {
         </div>
 
         <div id="videos">
-          <VideoStream id="local" stream={state.localStream} muted={true} />
+          <VideoStream id="local" stream={state.localStream} muted />
           <VideoStream id="remote" stream={state.remoteStream} />
         </div>
 
