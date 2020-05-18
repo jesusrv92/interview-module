@@ -68,7 +68,7 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function openUserMedia(dispatch) {
+  async function openUserMedia() {
     // Ask for access to webcam and microphone
     try {
       const stream = await navigator.mediaDevices.getUserMedia(
@@ -84,8 +84,9 @@ function App() {
         payload: remoteStreamGlobal
       });
     }
-    catch {
+    catch (e) {
       console.error('Error while obtaining media');
+      console.log(e);
       dispatch({
         type: HANGUP,
         payload: initialState
