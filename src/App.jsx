@@ -21,19 +21,10 @@ let firebaseApp = firebase.initializeApp({
   projectId: "fir-rtcchat"
 })
 
-const initialState = {
-  invited: false,
-  mediaOpen: false,
-  localStream: null,
-  remoteStream: null,
-  room: null,
-  peerConnection: null,
-};
-
 function App() {
   // These global variables are a fallback in case the state hasn't been set yet when it's needed
   let localStreamGlobal, remoteStreamGlobal, peerConnectionGlobal;
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer);
   let roomQuery = window.location.pathname.slice(1);
 
   useEffect(() => {
@@ -57,10 +48,7 @@ function App() {
       catch (e) {
         console.log(e);
         console.error('Error while trying to connect through invitation.')
-        dispatch({
-          type: HANGUP,
-          payload: initialState
-        });
+        dispatch({ type: HANGUP });
       }
     }
 
@@ -87,10 +75,7 @@ function App() {
     catch (e) {
       console.error('Error while obtaining media');
       console.log(e);
-      dispatch({
-        type: HANGUP,
-        payload: initialState
-      });
+      dispatch({ type: HANGUP });
     }
   }
 
@@ -107,7 +92,7 @@ function App() {
     if (state.peerConnection) {
       state.peerConnection.close();
     }
-    dispatch({ type: HANGUP, payload: initialState });
+    dispatch({ type: HANGUP });
 
     // Delete room on hangup
     if (state.room) {
