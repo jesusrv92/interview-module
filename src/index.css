@@ -11,21 +11,3 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-
-div#videos {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-
-div#videos > video {
-  background: black;
-  width: 640px;
-  height: 480px;
-  display: block;
-  margin: 1em;
-}
-
-video#local {
-  transform: scaleX(-1);
-}
