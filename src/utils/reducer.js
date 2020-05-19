@@ -7,14 +7,7 @@ import {
     SETINVITED
 } from './actions'
 
-const initialState = {
-    invited: false,
-    mediaOpen: false,
-    localStream: null,
-    remoteStream: null,
-    room: null,
-    peerConnection: null,
-};
+import initialState from './initialState'
 
 export default function reducer(state = initialState, action) {
     switch (action.type) {
