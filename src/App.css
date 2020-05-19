@@ -45,8 +45,7 @@ div#videos {
 
 div#videos > video {
   background: black;
-  width: 640px;
-  height: 480px;
+  flex: 1;
   display: block;
   margin: 1em;
 }
