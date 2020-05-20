@@ -299,8 +299,9 @@ function App() {
         </div>
 
         <div id="videos">
-          <VideoStream id="local" stream={state.localStream} muted />
-          <VideoStream id="remote" stream={state.remoteStream} />
+          {/* Added custom attribute default muted so it doesn't fire an event when muting video */}
+          <VideoStream id="local" stream={state.localStream} defaultmuted="true"/>
+          <VideoStream id="remotea" stream={state.remoteStream} />
         </div>
 
       </header>
