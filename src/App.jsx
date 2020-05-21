@@ -281,7 +281,7 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <div data-testid="main-app" className="App">
       <header className="App-header">
         {/* Grant access to media devices */}
         <div id="buttons">
