@@ -9,7 +9,7 @@ import {
 
 import initialState from './initialState'
 
-export default function reducer(state = initialState, action) {
+export default function reducer(state = initialState, action = {}) {
     switch (action.type) {
         case SETLOCALSTREAM:
             return Object.assign({}, state, { localStream: action.payload, mediaOpen: true });
