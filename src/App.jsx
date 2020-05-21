@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect } from 'react';
+import React from 'react';
 import configuration from './utils/ICEServerConfig';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
@@ -25,10 +25,10 @@ let firebaseApp = firebase.initializeApp({
 function App() {
   // These global variables are a fallback in case the state hasn't been set yet when it's needed
   let localStreamGlobal, remoteStreamGlobal, peerConnectionGlobal;
-  const [state, dispatch] = useReducer(reducer, {});
+  const [state, dispatch] = React.useReducer(reducer, {});
   let roomQuery = window.location.pathname.slice(1);
 
-  useEffect(() => {
+  React.useEffect(() => {
     async function invitation() {
       try {
         if (roomQuery && !state.mediaOpen) {
