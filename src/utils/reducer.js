@@ -24,6 +24,6 @@ export default function reducer(state = initialState, action = {}) {
         case SETINVITED:
             return Object.assign({}, state, { invited: true });
         default:
-            return state;
+            throw new Error(`Invalid action type: ${action.type}`)
     }
 }
