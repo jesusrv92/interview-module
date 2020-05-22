@@ -20,7 +20,7 @@ describe("Main component testing", () => {
     expect(React.useReducer).toBeCalled();
   });
 
-  test('Opens media without crashing.', async () => {
+  test('Should call function to open media', async () => {
     Object.defineProperty(window.navigator, 'mediaDevices', {
       value: {
         getUserMedia: jest.fn()
