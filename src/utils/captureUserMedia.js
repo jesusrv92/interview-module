@@ -1,4 +1,6 @@
-export default function captureUserMedia(callback, failure_callback) {
+import getMediaElement from 'getmediaelement'
+
+export default function captureUserMedia(config, videosContainer, callback, failure_callback) {
     var video = document.createElement('video');
     video.muted = true;
     video.volume = 0;
@@ -13,7 +15,7 @@ export default function captureUserMedia(callback, failure_callback) {
         video.setAttribute('controls', true);
     }
 
-    getUserMedia({
+    navigator.mediaDevices.getUserMedia({
         video: video,
         onsuccess: function (stream) {
             config.attachStream = stream;
