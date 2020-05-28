@@ -5,19 +5,19 @@
 // This library is known as multi-user connectivity wrapper!
 // It handles connectivity tasks to make sure two or more users can interconnect!
 
-export default function(config) {
+export default function conference(config) {
     var self = {
         userToken: uniqueToken()
     };
     var channels = '--', isbroadcaster;
     var isGetNewRoom = true;
     var sockets = [];
-    var defaultSocket = { };
+    var defaultSocket = {};
 
     function openDefaultSocket(callback) {
         defaultSocket = config.openSocket({
             onmessage: onDefaultSocketResponse,
-            callback: function(socket) {
+            callback: function (socket) {
                 defaultSocket = socket;
                 callback();
             }
@@ -25,13 +25,13 @@ export default function(config) {
     }
 
     function onDefaultSocketResponse(response) {
-        if (response.userToken == self.userToken) return;
+        if (response.userToken === self.userToken) return;
 
         if (isGetNewRoom && response.roomToken && response.broadcaster) config.onRoomFound(response);
 
-        if (response.newParticipant && self.joinedARoom && self.broadcasterid == response.userToken) onNewParticipant(response.newParticipant);
+        if (response.newParticipant && self.joinedARoom && self.broadcasterid === response.userToken) onNewParticipant(response.newParticipant);
 
-        if (response.userToken && response.joinUser == self.userToken && response.participant && channels.indexOf(response.userToken) == -1) {
+        if (response.userToken && response.joinUser === self.userToken && response.participant && channels.indexOf(response.userToken) === -1) {
             channels += response.userToken + '--';
             openSubSocket({
                 isofferer: true,
@@ -50,17 +50,17 @@ export default function(config) {
         var socketConfig = {
             channel: _config.channel,
             onmessage: socketResponse,
-            onopen: function() {
+            onopen: function () {
                 if (isofferer && !peer) initPeer();
                 sockets[sockets.length] = socket;
             }
         };
 
-        socketConfig.callback = function(_socket) {
+        socketConfig.callback = function (_socket) {
             socket = _socket;
             this.onopen();
 
-            if(_config.callback) {
+            if (_config.callback) {
                 _config.callback();
             }
         };
@@ -69,12 +69,12 @@ export default function(config) {
             isofferer = _config.isofferer,
             gotstream,
             video = document.createElement('video'),
-            inner = { },
+            inner = {},
             peer;
 
         var peerConfig = {
             attachStream: config.attachStream,
-            onICE: function(candidate) {
+            onICE: function (candidate) {
                 socket.send({
                     userToken: self.userToken,
                     candidate: {
@@ -83,7 +83,7 @@ export default function(config) {
                     }
                 });
             },
-            onRemoteStream: function(stream) {
+            onRemoteStream: function (stream) {
                 if (!stream) return;
 
                 try {
@@ -101,7 +101,7 @@ export default function(config) {
                 _config.stream = stream;
                 onRemoteStreamStartsFlowing();
             },
-            onRemoteStreamEnded: function(stream) {
+            onRemoteStreamEnded: function (stream) {
                 if (config.onRemoteStreamEnded)
                     config.onRemoteStreamEnded(stream, video);
             }
@@ -117,7 +117,7 @@ export default function(config) {
 
             peer = RTCPeerConnection(peerConfig);
         }
-        
+
         function afterRemoteStreamStartedFlowing() {
             gotstream = true;
 
@@ -137,11 +137,11 @@ export default function(config) {
         }
 
         function onRemoteStreamStartsFlowing() {
-            if(navigator.userAgent.match(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i)) {
+            if (navigator.userAgent.match(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i)) {
                 // if mobile device
                 return afterRemoteStreamStartedFlowing();
             }
-            
+
             if (!(video.readyState <= HTMLMediaElement.HAVE_CURRENT_DATA || video.paused || video.currentTime <= 0)) {
                 afterRemoteStreamStartedFlowing();
             } else setTimeout(onRemoteStreamStartsFlowing, 50);
@@ -155,7 +155,7 @@ export default function(config) {
         }
 
         function socketResponse(response) {
-            if (response.userToken == self.userToken) return;
+            if (response.userToken === self.userToken) return;
             if (response.sdp) {
                 inner.sdp = JSON.parse(response.sdp);
                 selfInvoker();
@@ -213,23 +213,23 @@ export default function(config) {
         }
 
         if (config.attachStream) {
-            if('stop' in config.attachStream) {
+            if ('stop' in config.attachStream) {
                 config.attachStream.stop();
             }
             else {
-                config.attachStream.getTracks().forEach(function(track) {
+                config.attachStream.getTracks().forEach(function (track) {
                     track.stop();
                 });
             }
         }
     }
-    
+
     window.addEventListener('beforeunload', function () {
         leave();
     }, false);
 
     window.addEventListener('keyup', function (e) {
-        if (e.keyCode == 116)
+        if (e.keyCode === 116)
             leave();
     }, false);
 
@@ -243,7 +243,7 @@ export default function(config) {
     }
 
     function onNewParticipant(channel) {
-        if (!channel || channels.indexOf(channel) != -1 || channel == self.userToken) return;
+        if (!channel || channels.indexOf(channel) !== -1 || channel === self.userToken) return;
         channels += channel + '--';
 
         var new_channel = uniqueToken();
@@ -260,16 +260,16 @@ export default function(config) {
     }
 
     function uniqueToken() {
-        var s4 = function() {
+        var s4 = function () {
             return Math.floor(Math.random() * 0x10000).toString(16);
         };
         return s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4();
     }
 
-    openDefaultSocket(config.onReady || function() {});
+    openDefaultSocket(config.onReady || function () { });
 
     return {
-        createRoom: function(_config) {
+        createRoom: function (_config) {
             self.roomName = _config.roomName || 'Anonymous';
             self.roomToken = uniqueToken();
 
@@ -277,7 +277,7 @@ export default function(config) {
             isGetNewRoom = false;
             startBroadcasting();
         },
-        joinRoom: function(_config) {
+        joinRoom: function (_config) {
             self.roomToken = _config.roomToken;
             isGetNewRoom = false;
 
@@ -286,7 +286,7 @@ export default function(config) {
 
             openSubSocket({
                 channel: self.userToken,
-                callback: function() {
+                callback: function () {
                     defaultSocket.send({
                         participant: true,
                         userToken: self.userToken,
