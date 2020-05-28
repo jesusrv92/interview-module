@@ -1,8 +1,9 @@
-import io from './libs/socket.io';
+import getMediaElement from 'getmediaelement';
+import io from 'socket.io-client';
+
 import conference from './libs/conference';
 
 import setupNewRoomButtonClickHandler from './utils/setupNewRoomButtonClickHandler';
-import rotateVideo from './utils/rotateVideo';
 import scaleVideos from './utils/scaleVideos';
 import captureUserMedia from './utils/captureUserMedia';
 
@@ -71,7 +72,7 @@ var config = {
 
             var broadcaster = this.getAttribute('data-broadcaster');
             var roomToken = this.getAttribute('data-roomToken');
-            captureUserMedia(function () {
+            captureUserMedia(config, videosContainer, function () {
                 conferenceUI.joinRoom({
                     roomToken: roomToken,
                     joinUser: broadcaster
@@ -103,7 +104,7 @@ var videosContainer = document.getElementById('videos-container') || document.bo
 var btnSetupNewRoom = document.getElementById('setup-new-room');
 var roomsList = document.getElementById('rooms-list');
 
-if (btnSetupNewRoom) btnSetupNewRoom.onclick = () => setupNewRoomButtonClickHandler(btnSetupNewRoom, conferenceUI);
+if (btnSetupNewRoom) btnSetupNewRoom.onclick = () => setupNewRoomButtonClickHandler(btnSetupNewRoom, conferenceUI, config, videosContainer);
 
 (function () {
     var uniqueToken = document.getElementById('unique-token');
