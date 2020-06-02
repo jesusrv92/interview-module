@@ -41,5 +41,6 @@
     "@types/testing-library__react": "^10.0.1",
     "react-test-renderer": "^16.13.1",
     "why-did-you-update": "^1.0.8"
-  }
+  },
+  "proxy": "https://socketio-over-nodejs2.herokuapp.com:443/"
 }
