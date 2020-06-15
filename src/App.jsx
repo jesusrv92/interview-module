@@ -1,12 +1,10 @@
 import React from 'react';
 import './App.css';
 
-import scaleVideos from './utils/scaleVideos';
 import config, { conferenceUI } from './utils/config'
 import captureUserMedia from './utils/captureUserMedia';
 
 const { location } = window;
-window.onresize = scaleVideos;
 
 function App() {
 
