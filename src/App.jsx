@@ -1,55 +1,24 @@
 import React from 'react';
 import './App.css';
 
-import config, { conferenceUI } from './utils/config'
-import captureUserMedia from './utils/captureUserMedia';
-
-const { location } = window;
-
 function App() {
-
-    React.useEffect(() => {
-        if (!location.hash.replace('#', '').length) {
-            location.href = location.href.split('#')[0] + '#' + (Math.random() * 100).toString().replace('.', '');
-            location.reload();
-        }
-    }, [])
-    const setupNewRoomButton = React.useRef();
-    const conferenceName = React.useRef();
-    const videosContainer = React.useRef();
-
     return (
         <article>
-            <header >
-                <section className="experiment">
-                    <section>
-                        <h2 style={{
-                            textAlign: "center",
-                            display: "block"
-                        }}>
-                            <a href={location.href}>Right click to copy & share this private link</a>
-                        </h2>
+            <section id="new-conference">
+                <div id="conference-input">
+                    <button id="setup-new-room" className="setup">Setup New Conference</button>
+                    <button id="invitation" className="invitation setup" disabled> Copy invitation</button>
+                </div>
+                <button id="hang-up" className="setup" disabled> Hang Up</button>
+            </section>
 
-                        <input type="text" ref={conferenceName} id="conference-name" placeholder="Conference Name" />
-                        <button id="setup-new-room" ref={setupNewRoomButton} className="setup" onClick={() => {
-                            setupNewRoomButton.current.disabled = true;
-                            conferenceName.current.disabled = true;
-                            captureUserMedia(config, videosContainer.current, () => {
-                                conferenceUI.createRoom({
-                                    roomName: (conferenceName || {}).value || 'Anonymous'
-                                });
-                            }, () => {
-                                setupNewRoomButton.current.disabled = false;
-                                conferenceName.current.disabled = false;
-                            })
-                        }}>Setup New Conference</button>
-                    </section>
+            {/* list of all available conferencing rooms */}
+            <table id="rooms-list"></table>
 
-                    <table id="rooms-list"></table>
+            {/* local/remote videos container */}
+            <div id="videos-container"></div>
 
-                    <div id="videos-container" ref={videosContainer}></div>
-                </section>
-            </header>
+            <script src="./app.js"></script>
         </article>
     );
 }
