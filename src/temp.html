@@ -1,0 +1,81 @@
+<!--
+> Muaz Khan       - wwww.MuazKhan.com
+> MIT License     - www.WebRTC-Experiment.com/licence
+> Documentation   - github.com/muaz-khan/WebRTC-Experiment/tree/master/video-conferencing
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Interview Module</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <script>
+        var invited = false;
+        if (!location.hash.replace('#', '').length) {
+            location.href = location.href.split('#')[0] + '#' + (Math.random() * 100).toString().replace('.', '');
+        }
+        else {
+            invited = true;
+        }
+    </script>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
+    <meta name="author" content="Muaz Khan">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <meta name="title" content="Video Conferencing" />
+    <meta name="description" content="Video Conferencing using WebRTC." />
+    <meta name="keywords" content="WebRTC, Video Conferencing, Demo, Example, Experiment" />
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./libs/getMediaElement.css">
+
+    <!-- script used to stylize video element -->
+    <script src="./libs/getMediaElement.js"> </script>
+
+    <script src="./libs/adapter-latest.js"></script>
+    <script src="./libs/socket.io.js"> </script>
+    <script src="./libs/RTCPeerConnection-v1.5.js"> </script>
+    <script src="./libs/IceServersHandler.js"></script>
+    <!-- <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    
+    <script src="https://www.webrtc-experiment.com/getMediaElement.min.js"> </script>
+    <script src="https://www.webrtc-experiment.com/RTCPeerConnection-v1.5.js"> </script>
+    <script src="https://www.webrtc-experiment.com/IceServersHandler.js"></script> -->
+    <script src="./conference.js"> </script>
+    <script src="./libs/clipboard.min.js"></script>
+</head>
+
+<body>
+    <article>
+        <section id="new-conference">
+            <div id="conference-input">
+                <button id="setup-new-room" class="setup">Setup New Conference</button>
+                <button id="invitation" class="invitation setup" disabled> Copy invitation</button>
+            </div>
+            <button id="hang-up" class="setup" disabled> Hang Up</button>
+        </section>
+        <script>
+            document.getElementById('conference-input').hidden = invited;
+            new ClipboardJS('.invitation', {
+                text: function (trigger) {
+                    return window.location.href;
+                }
+            });
+        </script>
+        <!-- list of all available conferencing rooms -->
+        <table style="width: 100%;" id="rooms-list"></table>
+
+        <!-- local/remote videos container -->
+        <div id="videos-container"></div>
+
+        <script src="./app.js"></script>
+    </article>
+</body>
+
+</html>
