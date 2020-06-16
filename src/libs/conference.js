@@ -15,7 +15,7 @@ export default function conference(config) {
     var defaultSocket = {};
 
     function openDefaultSocket(callback) {
-        defaultSocket = config.openSocket({
+        config.openSocket({
             onmessage: onDefaultSocketResponse,
             callback: function (socket) {
                 defaultSocket = socket;
@@ -191,18 +191,13 @@ export default function conference(config) {
     }
 
     function leave() {
-        var length = sockets.length;
-        for (var i = 0; i < length; i++) {
-            var socket = sockets[i];
-            if (socket) {
-                socket.send({
-                    left: true,
-                    userToken: self.userToken
-                });
-                delete sockets[i];
-            }
-        }
-
+        sockets.forEach(socket => {
+            socket.send({
+                left: true,
+                userToken: self.userToken
+            });
+        });
+        sockets = [];
         // if owner leaves; try to remove his room from all other users side
         if (isbroadcaster) {
             defaultSocket.send({
@@ -219,19 +214,11 @@ export default function conference(config) {
             else {
                 config.attachStream.getTracks().forEach(function (track) {
                     track.stop();
+                    track.dispatchEvent(new Event('ended'));
                 });
             }
         }
     }
-
-    window.addEventListener('beforeunload', function () {
-        leave();
-    }, false);
-
-    window.addEventListener('keyup', function (e) {
-        if (e.keyCode === 116)
-            leave();
-    }, false);
 
     function startBroadcasting() {
         defaultSocket && defaultSocket.send({
