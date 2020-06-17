@@ -8,16 +8,33 @@ function App() {
     // This checks if a call has been initiated
     const [onCall, setOnCall] = React.useState(false);
 
+    React.useEffect(() => {
+        if (!window.location.hash.replace('#', '').length) {
+            window.location.href = window.location.href.split('#')[0] + '#' + (Math.random() * 100).toString().replace('.', '');
+        }
+        else {
+            setInvited(true);
+        }
+    }, [])
+
     return (
         <article>
             <section id="new-conference">
                 <div id="conference-input" hidden={invited}>
-                    <button id="setup-new-room" className="setup" disabled={onCall}>Setup New Conference</button>
+                    <button id="setup-new-room" className="setup" disabled={onCall}
+                        onClick={() => {
+                            setOnCall(true);
+                        }}
+                    >Setup New Conference</button>
                     <Clipboard id="invitation" className="setup" button-disabled={invited || !onCall}
                         data-clipboard-text={window.location.href}
                     >Copy invitation</Clipboard>
                 </div>
-                <button id="hang-up" className="setup" disabled={!onCall}>Hang Up</button>
+                <button id="hang-up" className="setup" disabled={!onCall}
+                    onClick={() => {
+                        setOnCall(false);
+                    }}
+                >Hang Up</button>
             </section>
 
             {/* list of all available conferencing rooms */}
