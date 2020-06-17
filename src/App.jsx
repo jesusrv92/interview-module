@@ -25,8 +25,6 @@ function App() {
 
             {/* local/remote videos container */}
             <div id="videos-container"></div>
-
-            <script src="./app.js"></script>
         </article>
     );
 }
