@@ -13,11 +13,11 @@ function App() {
             <section id="new-conference">
                 <div id="conference-input" hidden={invited}>
                     <button id="setup-new-room" className="setup" disabled={onCall}>Setup New Conference</button>
-                    <Clipboard id="invitation" className="setup" button-disabled={invited && !onCall}
+                    <Clipboard id="invitation" className="setup" button-disabled={invited || !onCall}
                         data-clipboard-text={window.location.href}
                     >Copy invitation</Clipboard>
                 </div>
-                <button id="hang-up" className="setup" disabled={onCall}>Hang Up</button>
+                <button id="hang-up" className="setup" disabled={!onCall}>Hang Up</button>
             </section>
 
             {/* list of all available conferencing rooms */}
