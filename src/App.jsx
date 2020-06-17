@@ -1,18 +1,23 @@
 import React from 'react';
+import Clipboard from 'react-clipboard.js'
 
 function App() {
     // This checks if someone came from the main link
     // or came through an invitation link
     const [invited, setInvited] = React.useState(false);
+    // This checks if a call has been initiated
+    const [onCall, setOnCall] = React.useState(false);
 
     return (
         <article>
             <section id="new-conference">
                 <div id="conference-input" hidden={invited}>
-                    <button id="setup-new-room" className="setup">Setup New Conference</button>
-                    <button id="invitation" className="invitation setup" disabled>Copy invitation</button>
+                    <button id="setup-new-room" className="setup" disabled={onCall}>Setup New Conference</button>
+                    <Clipboard id="invitation" className="setup" button-disabled={invited && !onCall}
+                        data-clipboard-text={window.location.href}
+                    >Copy invitation</Clipboard>
                 </div>
-                <button id="hang-up" className="setup" disabled>Hang Up</button>
+                <button id="hang-up" className="setup" disabled={onCall}>Hang Up</button>
             </section>
 
             {/* list of all available conferencing rooms */}
