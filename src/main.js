@@ -1,3 +1,7 @@
+import io from 'socket.io-client'
+import getMediaElement from './libs/getMediaElement'
+import {getUserMedia} from './libs/RTCPeerConnection-v1.5'
+import conference from './libs/conference'
 // Muaz Khan     - https://github.com/muaz-khan
 // MIT License   - https://www.webrtc-experiment.com/licence/
 // Documentation - https://github.com/muaz-khan/WebRTC-Experiment/tree/master/video-conferencing
@@ -7,7 +11,7 @@ var config = {
     openSocket: function (config) {
         var SIGNALING_SERVER = 'https://socketio-over-nodejs2.herokuapp.com:443/';
 
-        config.channel = config.channel || location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
+        config.channel = config.channel || window.location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
         var sender = Math.round(Math.random() * 999999999) + 999999999;
 
         io.connect(SIGNALING_SERVER).emit('new-channel', {
@@ -170,9 +174,3 @@ window.onclose = window.onbeforeunload = () => {
         track.stop();
     })
 }
-(function () {
-    var uniqueToken = document.getElementById('unique-token');
-    if (uniqueToken)
-        if (location.hash.length > 2) uniqueToken.parentNode.parentNode.parentNode.innerHTML = '<h2 style="text-align:center;display: block;"><a href="' + location.href + '" target="_blank">Right click to copy & share this private link</a></h2>';
-        else uniqueToken.innerHTML = uniqueToken.parentNode.parentNode.href = '#' + (Math.random() * new Date().getTime()).toString(36).toUpperCase().replace(/\./g, '-');
-})();
