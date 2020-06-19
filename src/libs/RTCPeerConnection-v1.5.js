@@ -3,21 +3,18 @@
 // Muaz Khan     - github.com/muaz-khan
 // MIT License   - www.WebRTC-Experiment.com/licence
 // Documentation - github.com/muaz-khan/WebRTC-Experiment/tree/master/RTCPeerConnection
-
+var RTCPeerConnection00 = window.RTCPeerConnection
 if (typeof window.RTCPeerConnection !== 'undefined') {
     window.RTCPeerConnection00 = window.RTCPeerConnection;
 } else if (typeof mozRTCPeerConnection !== 'undefined') {
-    window.RTCPeerConnection00 = mozRTCPeerConnection;
+    window.RTCPeerConnection00 = window.mozRTCPeerConnection;
 } else if (typeof webkitRTCPeerConnection !== 'undefined') {
-    window.RTCPeerConnection00 = webkitRTCPeerConnection;
+    window.RTCPeerConnection00 = window.webkitRTCPeerConnection;
 }
 
-var RTCPeerConnection = function (options) {
-    var w = window;
-
+export var RTCPeerConnection = function (options) {
     var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription;
     var RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate;
-    var MediaStreamTrack = window.MediaStreamTrack;
 
     var peer = new RTCPeerConnection00({
         iceServers: IceServersHandler.getIceServers()
@@ -42,12 +39,11 @@ var RTCPeerConnection = function (options) {
         // attachStreams[1] = video-stream;
         // attachStreams[2] = screen-capturing-stream;
         if (options.attachStreams && options.attachStream.length) {
-            var streams = options.attachStreams;
-            for (var i = 0; i < streams.length; i++) {
-                streams[i].getTracks().forEach(function(track) {
-                    peer.addTrack(track, streams[i]);
-                });
-            }
+            options.attachStreams.forEach(stream => {
+                stream.getTracks().forEach(track => {
+                    peer.addTrack(track,stream)
+                })
+            });
         }
 
         var dontDuplicate = {};
@@ -78,10 +74,7 @@ var RTCPeerConnection = function (options) {
         // attachStreams[1] = video-stream;
         // attachStreams[2] = screen-capturing-stream;
         if (options.attachStreams && options.attachStream.length) {
-            var streams = options.attachStreams;
-            for (var i = 0; i < streams.length; i++) {
-                peer.addStream(streams[i]);
-            }
+            options.attachStreams.forEach(stream => peer.addStream(stream));
         }
 
         peer.onaddstream = function(event) {
@@ -140,7 +133,7 @@ var RTCPeerConnection = function (options) {
     }
 
     // if Mozilla Firefox & DataChannel; offer/answer will be created later
-    if ((options.onChannelMessage && !moz) || !options.onChannelMessage) {
+    if ((options.onChannelMessage && !window.moz) || !options.onChannelMessage) {
         createOffer();
         createAnswer();
     }
@@ -197,7 +190,7 @@ var RTCPeerConnection = function (options) {
     function onSdpError(e) {
         var message = JSON.stringify(e, null, '\t');
 
-        if (message.indexOf('RTP/SAVPF Expects at least 4 fields') != -1) {
+        if (message.indexOf('RTP/SAVPF Expects at least 4 fields') !== -1) {
             message = 'It seems that you are trying to interop RTP-datachannels with SCTP. It is not supported!';
         }
 
@@ -232,7 +225,7 @@ var video_constraints = {
     optional: []
 };
 
-function getUserMedia(options) {
+export function getUserMedia(options) {
     navigator.mediaDevices.getUserMedia(options.constraints || {
             audio: true,
             video: video_constraints
