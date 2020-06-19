@@ -9,7 +9,7 @@
 // __________________
 // getMediaElement.js
 
-function getMediaElement(mediaElement, config) {
+export default function getMediaElement(mediaElement, config) {
     config = config || {};
 
     function getTracks(stream, kind) {
@@ -22,17 +22,17 @@ function getMediaElement(mediaElement, config) {
         });
     }
 
-    if (!mediaElement.nodeName || (mediaElement.nodeName.toLowerCase() != 'audio' && mediaElement.nodeName.toLowerCase() != 'video')) {
+    if (!mediaElement.nodeName || (mediaElement.nodeName.toLowerCase() !== 'audio' && mediaElement.nodeName.toLowerCase() !== 'video')) {
+        var mediaStream = mediaElement;
         if (!getTracks(mediaStream, 'video').length) {
             return getAudioElement(mediaElement, config);
         }
 
-        var mediaStream = mediaElement;
         mediaElement = document.createElement(getTracks(mediaStream, 'audio') ? 'video' : 'audio');
         mediaElement.srcObject = mediaStream;
     }
 
-    if (mediaElement.nodeName && mediaElement.nodeName.toLowerCase() == 'audio') {
+    if (mediaElement.nodeName && mediaElement.nodeName.toLowerCase() === 'audio') {
         return getAudioElement(mediaElement, config);
     }
 
@@ -73,7 +73,7 @@ function getMediaElement(mediaElement, config) {
 
         muteAudio.onclick = function () {
             let [audioMediaStreamTrack] = mediaElement.srcObject.getAudioTracks()
-            if (muteAudio.className.indexOf('unmute-audio') != -1) {
+            if (muteAudio.className.indexOf('unmute-audio') !== -1) {
                 muteAudio.className = muteAudio.className.replace('unmute-audio selected', 'mute-audio');
                 mediaElement.muted = false;
                 if (config.selfStream) mediaElement.volume = 1;
@@ -96,7 +96,7 @@ function getMediaElement(mediaElement, config) {
 
         muteVideo.onclick = function () {
             let [videoMediaStreamTrack] = mediaElement.srcObject.getVideoTracks()
-            if (muteVideo.className.indexOf('unmute-video') != -1) {
+            if (muteVideo.className.indexOf('unmute-video') !== -1) {
                 muteVideo.className = muteVideo.className.replace('unmute-video selected', 'mute-video');
                 mediaElement.play();
                 videoMediaStreamTrack.enabled = true;
@@ -145,7 +145,7 @@ function getMediaElement(mediaElement, config) {
         volumeControl.appendChild(recordAudio);
 
         recordAudio.onclick = function () {
-            if (recordAudio.className.indexOf('stop-recording-audio') != -1) {
+            if (recordAudio.className.indexOf('stop-recording-audio') !== -1) {
                 recordAudio.className = recordAudio.className.replace('stop-recording-audio selected', 'record-audio');
                 if (config.onRecordingStopped) config.onRecordingStopped('audio');
             } else {
@@ -161,7 +161,7 @@ function getMediaElement(mediaElement, config) {
         volumeControl.appendChild(recordVideo);
 
         recordVideo.onclick = function () {
-            if (recordVideo.className.indexOf('stop-recording-video') != -1) {
+            if (recordVideo.className.indexOf('stop-recording-video') !== -1) {
                 recordVideo.className = recordVideo.className.replace('stop-recording-video selected', 'record-video');
                 if (config.onRecordingStopped) config.onRecordingStopped('video');
             } else {
@@ -196,7 +196,7 @@ function getMediaElement(mediaElement, config) {
         } else volumeControl.appendChild(zoom);
 
         zoom.onclick = function () {
-            if (zoom.className.indexOf('zoom-out') != -1) {
+            if (zoom.className.indexOf('zoom-out') !== -1) {
                 zoom.className = zoom.className.replace('zoom-out selected', 'zoom-in');
                 exitFullScreen();
             } else {
@@ -230,7 +230,7 @@ function getMediaElement(mediaElement, config) {
         }
 
         function screenStateChange(e) {
-            if (e.srcElement != mediaElementContainer) return;
+            if (e.srcElement !== mediaElementContainer) return;
 
             var isFullScreeMode = document.webkitIsFullScreen || document.mozFullScreen || document.fullscreen;
 
@@ -244,7 +244,7 @@ function getMediaElement(mediaElement, config) {
             if (!isFullScreeMode && config.onZoomout) config.onZoomout();
             if (isFullScreeMode && config.onZoomin) config.onZoomin();
 
-            if (!isFullScreeMode && zoom.className.indexOf('zoom-out') != -1) {
+            if (!isFullScreeMode && zoom.className.indexOf('zoom-out') !== -1) {
                 zoom.className = zoom.className.replace('zoom-out selected', 'zoom-in');
                 if (config.onZoomout) config.onZoomout();
             }
@@ -266,7 +266,7 @@ function getMediaElement(mediaElement, config) {
 
     mediaBox.appendChild(mediaElement);
 
-    if (!config.width) config.width = (innerWidth / 2) - 50;
+    if (!config.width) config.width = (window.innerWidth / 2) - 50;
 
     mediaElementContainer.style.width = config.width;
 
@@ -320,20 +320,20 @@ function getMediaElement(mediaElement, config) {
     adjustControls();
 
     mediaElementContainer.toggle = function (clasName) {
-        if (typeof clasName != 'string') {
+        if (typeof clasName !== 'string') {
             for (var i = 0; i < clasName.length; i++) {
                 mediaElementContainer.toggle(clasName[i]);
             }
             return;
         }
 
-        if (clasName == 'mute-audio' && muteAudio) muteAudio.onclick();
-        if (clasName == 'mute-video' && muteVideo) muteVideo.onclick();
+        if (clasName === 'mute-audio' && muteAudio) muteAudio.onclick();
+        if (clasName === 'mute-video' && muteVideo) muteVideo.onclick();
 
-        if (clasName == 'record-audio' && recordAudio) recordAudio.onclick();
-        if (clasName == 'record-video' && recordVideo) recordVideo.onclick();
+        if (clasName === 'record-audio' && recordAudio) recordAudio.onclick();
+        if (clasName === 'record-video' && recordVideo) recordVideo.onclick();
 
-        if (clasName == 'stop' && stop) stop.onclick();
+        if (clasName === 'stop' && stop) stop.onclick();
 
         return this;
     };
@@ -349,7 +349,7 @@ function getMediaElement(mediaElement, config) {
 function getAudioElement(mediaElement, config) {
     config = config || {};
 
-    if (!mediaElement.nodeName || (mediaElement.nodeName.toLowerCase() != 'audio' && mediaElement.nodeName.toLowerCase() != 'video')) {
+    if (!mediaElement.nodeName || (mediaElement.nodeName.toLowerCase() !== 'audio' && mediaElement.nodeName.toLowerCase() !== 'video')) {
         var mediaStream = mediaElement;
         mediaElement = document.createElement('audio');
         mediaElement.srcObject = mediaStream;
@@ -377,7 +377,7 @@ function getAudioElement(mediaElement, config) {
     muteAudio.style['border-top-left-radius'] = '5px';
 
     muteAudio.onclick = function () {
-        if (muteAudio.className.indexOf('unmute-audio') != -1) {
+        if (muteAudio.className.indexOf('unmute-audio') !== -1) {
             muteAudio.className = muteAudio.className.replace('unmute-audio selected', 'mute-audio');
             mediaElement.muted = false;
             if (config.onUnMuted) config.onUnMuted('audio');
@@ -388,13 +388,13 @@ function getAudioElement(mediaElement, config) {
         }
     };
 
-    if (!config.buttons || (config.buttons && config.buttons.indexOf('record-audio') != -1)) {
+    if (!config.buttons || (config.buttons && config.buttons.indexOf('record-audio') !== -1)) {
         var recordAudio = document.createElement('div');
         recordAudio.className = 'control ' + (config.toggle.has('record-audio') ? 'stop-recording-audio selected' : 'record-audio');
         mediaControls.appendChild(recordAudio);
 
         recordAudio.onclick = function () {
-            if (recordAudio.className.indexOf('stop-recording-audio') != -1) {
+            if (recordAudio.className.indexOf('stop-recording-audio') !== -1) {
                 recordAudio.className = recordAudio.className.replace('stop-recording-audio selected', 'record-audio');
                 if (config.onRecordingStopped) config.onRecordingStopped('audio');
             } else {
@@ -413,7 +413,7 @@ function getAudioElement(mediaElement, config) {
     slider.style.marginTop = '11px';
     slider.style.width = ' 200px';
 
-    if (config.buttons && config.buttons.indexOf('record-audio') == -1) {
+    if (config.buttons && config.buttons.indexOf('record-audio') === -1) {
         slider.style.width = ' 241px';
     }
 
@@ -493,16 +493,16 @@ function getAudioElement(mediaElement, config) {
     adjustControls();
 
     mediaElementContainer.toggle = function (clasName) {
-        if (typeof clasName != 'string') {
+        if (typeof clasName !== 'string') {
             for (var i = 0; i < clasName.length; i++) {
                 mediaElementContainer.toggle(clasName[i]);
             }
             return;
         }
 
-        if (clasName == 'mute-audio' && muteAudio) muteAudio.onclick();
-        if (clasName == 'record-audio' && recordAudio) recordAudio.onclick();
-        if (clasName == 'stop' && stop) stop.onclick();
+        if (clasName === 'mute-audio' && muteAudio) muteAudio.onclick();
+        if (clasName === 'record-audio' && recordAudio) recordAudio.onclick();
+        if (clasName === 'stop' && stop) stop.onclick();
 
         return this;
     };
@@ -510,14 +510,4 @@ function getAudioElement(mediaElement, config) {
     mediaElementContainer.media = mediaElement;
 
     return mediaElementContainer;
-}
-
-if (typeof module !== 'undefined' /* && !!module.exports*/) {
-    module.exports = exports = getMediaElement;
-}
-
-if (typeof define === 'function' && define.amd) {
-    define('getMediaElement', [], function () {
-        return getMediaElement;
-    });
 }
