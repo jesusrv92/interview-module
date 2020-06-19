@@ -1,4 +1,5 @@
-﻿// Muaz Khan         - www.MuazKhan.com
+﻿import { RTCPeerConnection } from './RTCPeerConnection-v1.5'
+// Muaz Khan         - www.MuazKhan.com
 // MIT License       - www.WebRTC-Experiment.com/licence
 // Experiments       - github.com/muaz-khan/WebRTC-Experiment
 
