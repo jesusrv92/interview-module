@@ -51,6 +51,17 @@ function getMediaElement(mediaElement, config) {
     var mediaElementContainer = document.createElement('div');
     mediaElementContainer.className = 'media-container';
 
+    var disconnectedContainer = document.createElement('div');
+    var disconnectedWarningSymbol = document.createElement('div');
+    var disconnectedWarningText = document.createElement('div');
+    disconnectedContainer.className = 'disconnected';
+    disconnectedContainer.hidden = true;
+    disconnectedWarningSymbol.textContent = '⚠️';
+    disconnectedWarningText.textContent = 'DISCONNECTED';
+    disconnectedContainer.appendChild(disconnectedWarningSymbol);
+    disconnectedContainer.appendChild(disconnectedWarningText);
+    mediaElementContainer.appendChild(disconnectedContainer);
+    
     var mediaControls = document.createElement('div');
     mediaControls.className = 'media-controls';
     mediaElementContainer.appendChild(mediaControls);
