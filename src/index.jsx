@@ -1,8 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import './libs/getMediaElement.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import adapter from 'webrtc-adapter'
+
+console.log(adapter.browserDetails.browser);
+console.log(adapter.browserDetails.version);
 
 if (process.env.NODE_ENV !== 'production') {
   const {whyDidYouUpdate} = require('why-did-you-update');
