@@ -35,7 +35,7 @@ var config = {
             width: '30%',
             buttons: ['mute-audio', 'mute-video']
         });
-        mediaElement.id = media.stream.streamid;
+        mediaElement.id = media.stream.id.slice(1, -1);
         videosContainer.appendChild(mediaElement);
     },
     onRemoteStreamEnded: function (stream, video) {
