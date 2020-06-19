@@ -13,6 +13,7 @@ export default function conference(config) {
     var isGetNewRoom = true;
     var sockets = [];
     var defaultSocket = {};
+    var peers = []
 
     function openDefaultSocket(callback) {
         config.openSocket({
@@ -116,6 +117,19 @@ export default function conference(config) {
             }
 
             peer = RTCPeerConnection(peerConfig);
+            // console.log(peer)
+            peers.push(peer);
+            peer.peer.oniceconnectionstatechange = () => {
+                if (peer.peer.iceConnectionState === 'connected' || peer.peer.iceConnectionState === 'completed') {
+                    const [disconnectedContainer] = video.parentElement.parentElement.getElementsByClassName('disconnected');
+                    disconnectedContainer.hidden = true;
+                }
+                if (peer.peer.iceConnectionState === 'disconnected') {
+                    const [disconnectedContainer] = video.parentElement.parentElement.getElementsByClassName('disconnected');
+                    disconnectedContainer.hidden = false;
+                }
+                if (peer.peer.iceConnectionState === 'failed') peer.peer.close();
+            }
         }
 
         function afterRemoteStreamStartedFlowing() {
@@ -282,6 +296,7 @@ export default function conference(config) {
                 }
             });
         },
-        leaveRoom: leave
+        leaveRoom: leave,
+        peers
     };
 };
